@@ -1,64 +1,96 @@
-<h1>Quản lý Sách</h1>
+<section class="page-head">
+  <h1>Quản lý Sách</h1>
+  {{#if isWriter}}
+  <p class="routing">
+    Đang dùng tài khoản ghi <code>{{writeUser}}</code> (thủ thư): thêm sách, sửa giá, đổi tên.
+    Danh sách vẫn được đọc bằng <code>{{readUser}}</code>. · <a href="/status">/status</a>
+  </p>
+  {{else}}
+  <p class="routing">
+    Đang dùng tài khoản đọc <code>{{readUser}}</code>: chỉ xem danh sách, giá và giá sau thuế.
+    · <a href="/status">/status</a>
+  </p>
+  {{/if}}
+</section>
 
-{{#if flash}}<p class="flash">{{flash}}</p>{{/if}}
+<section class="stats" aria-label="Tổng quan">
+  <div class="card stat"><small>Tổng số sách</small><strong>{{books.length}}</strong></div>
+  <div class="card stat"><small>VAT áp dụng</small><strong>{{vat}}%</strong></div>
+  <div class="card stat"><small>Tài khoản đang dùng</small><strong class="text">{{#if isWriter}}Writer · thủ thư{{else}}Reader · chỉ xem{{/if}}</strong></div>
+  <div class="card stat"><small>Lượt truy cập (session)</small><strong>{{views}}</strong></div>
+</section>
 
-{{#if isWriter}}
-<p class="routing">
-  Đang dùng tài khoản ghi <code>{{writeUser}}</code> (thủ thư): thêm sách, sửa giá, đổi tên.
-  Danh sách vẫn được đọc bằng <code>{{readUser}}</code>. · <a href="/status">/status</a>
+{{#if flash}}
+<p class="card flash" role="status">
+  <span class="tick" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1d2330" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+  </span>
+  {{flash}}
 </p>
-
-<h2>Thêm sách mới</h2>
-<form method="POST" action="/" class="add">
-  <input name="code" placeholder="Mã sản phẩm (bắt đầu bằng 3 số cuối MSSV)" required>
-  <input name="title" placeholder="Tên sách" required>
-  <input name="author" placeholder="Tác giả" required>
-  <input name="price" type="number" min="0" step="any" placeholder="Giá gốc" required>
-  <button type="submit">Thêm sách</button>
-</form>
-
-<h2>Danh sách sách</h2>
-<table>
-  <thead>
-    <tr><th>Mã</th><th>Tên sách</th><th>Tác giả</th><th>Giá gốc</th><th>VAT (%)</th><th>Giá sau VAT</th><th></th></tr>
-  </thead>
-  <tbody>
-    {{#each books}}
-    <tr>
-      <td>{{code}}</td>
-      <td><input form="edit-{{code}}" name="title" value="{{title}}" required></td>
-      <td>{{author}}</td>
-      <td><input form="edit-{{code}}" name="price" type="number" min="0" step="any" value="{{price}}" required></td>
-      <td>{{vat}}</td>
-      <td>{{priceAfterVat}}</td>
-      <td>
-        <form id="edit-{{code}}" method="POST" action="/books/{{code}}"><button type="submit">Lưu</button></form>
-      </td>
-    </tr>
-    {{else}}
-    <tr><td colspan="7">Chưa có sách nào.</td></tr>
-    {{/each}}
-  </tbody>
-</table>
-{{else}}
-<p class="routing">
-  Đang dùng tài khoản đọc <code>{{readUser}}</code>: chỉ xem danh sách, giá và giá sau thuế.
-  · <a href="/status">/status</a>
-</p>
-
-<table>
-  <thead>
-    <tr><th>Mã</th><th>Tên sách</th><th>Tác giả</th><th>Giá gốc</th><th>VAT (%)</th><th>Giá sau VAT</th></tr>
-  </thead>
-  <tbody>
-    {{#each books}}
-    <tr>
-      <td>{{code}}</td><td>{{title}}</td><td>{{author}}</td>
-      <td>{{price}}</td><td>{{vat}}</td><td>{{priceAfterVat}}</td>
-    </tr>
-    {{else}}
-    <tr><td colspan="6">Chưa có sách nào.</td></tr>
-    {{/each}}
-  </tbody>
-</table>
 {{/if}}
+
+<div class="workspace {{#if isWriter}}with-side{{/if}}">
+  <section class="card panel">
+    <div class="panel-head">
+      <h2>Danh sách sách</h2>
+      <span class="chip">{{books.length}} sách</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Mã</th><th>Tên sách</th><th>Tác giả</th>
+            <th class="num">Giá gốc</th><th class="num">VAT (%)</th><th class="num">Giá sau VAT</th>
+            {{#if isWriter}}<th></th>{{/if}}
+          </tr>
+        </thead>
+        <tbody>
+          {{#each books}}
+          <tr>
+            <td><span class="chip">{{code}}</span></td>
+            {{#if @root.isWriter}}
+            <td class="title"><input form="edit-{{code}}" name="title" value="{{title}}" aria-label="Tên sách" required></td>
+            <td>{{author}}</td>
+            <td class="num"><input form="edit-{{code}}" name="price" type="number" min="0" step="any" value="{{price}}" aria-label="Giá gốc" required></td>
+            {{else}}
+            <td class="title">{{title}}</td>
+            <td>{{author}}</td>
+            <td class="num">{{price}}</td>
+            {{/if}}
+            <td class="num">{{vat}}</td>
+            <td class="num"><span class="total">{{priceAfterVat}}</span></td>
+            {{#if @root.isWriter}}
+            <td class="num">
+              <form id="edit-{{code}}" method="POST" action="/books/{{code}}"><button type="submit" class="btn mint small">Lưu</button></form>
+            </td>
+            {{/if}}
+          </tr>
+          {{else}}
+          <tr><td class="empty" colspan="{{#if isWriter}}7{{else}}6{{/if}}">Chưa có sách nào.</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {{#if isWriter}}
+  <aside class="card panel side">
+    <div class="panel-head"><h2>Thêm sách mới</h2></div>
+    <form method="POST" action="/" class="add">
+      <label class="field">Mã sản phẩm <small>Bắt đầu bằng 3 số cuối MSSV</small>
+        <input name="code" required>
+      </label>
+      <label class="field">Tên sách
+        <input name="title" required>
+      </label>
+      <label class="field">Tác giả
+        <input name="author" required>
+      </label>
+      <label class="field">Giá gốc
+        <input name="price" type="number" min="0" step="any" required>
+      </label>
+      <button type="submit" class="btn sky">Thêm sách</button>
+    </form>
+  </aside>
+  {{/if}}
+</div>

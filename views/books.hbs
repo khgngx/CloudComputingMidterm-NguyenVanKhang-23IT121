@@ -1,5 +1,13 @@
 <h1>Quản lý Sách</h1>
 
+{{#if flash}}<p class="flash">{{flash}}</p>{{/if}}
+
+<ul class="routing">
+  <li>Xem danh sách → tài khoản đọc <code>{{readUser}}</code> (role <code>read</code>)</li>
+  <li>Thêm sách → tài khoản ghi <code>{{writeUser}}</code> (role <code>readWrite</code>)</li>
+  <li>Session → lưu tại Atlas, collection <code>sessions</code> · <a href="/status">/status</a></li>
+</ul>
+
 <form method="POST" action="/">
   <input name="code" placeholder="Mã sản phẩm (bắt đầu bằng {{studentId}}…)" required>
   <input name="title" placeholder="Tên sách" required>

@@ -2,13 +2,16 @@ const express = require('express');
 const { BookRead, BookWrite } = require('../models/Book');
 const validateCode = require('../middleware/validateCode');
 const { VAT } = require('../config/student');
+const { writeUser } = require('../config/db');
 
 const router = express.Router();
 
 // READ -> reader account
 router.get('/', async (req, res) => {
   const books = await BookRead.find().sort({ createdAt: -1 }).lean();
-  res.render('books', { books });
+  const { flash } = req.session;
+  delete req.session.flash;
+  res.render('books', { books, flash });
 });
 
 // WRITE -> writer account
@@ -34,6 +37,7 @@ router.post('/', validateCode, async (req, res) => {
     }
     throw err;
   }
+  req.session.flash = `Đã thêm sách "${req.body.code}" (giá sau VAT ${priceAfterVat}) bằng tài khoản ghi ${writeUser}.`;
   res.redirect('/');
 });
 

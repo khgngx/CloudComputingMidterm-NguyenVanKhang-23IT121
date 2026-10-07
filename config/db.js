@@ -12,4 +12,9 @@ writeConn.on('connected', () => console.log('Writer connected'));
 readConn.on('error', (e) => console.error('Reader error:', e.message));
 writeConn.on('error', (e) => console.error('Writer error:', e.message));
 
-module.exports = { readConn, writeConn };
+// Usernames only (never the password) so the UI can show which account serves each flow.
+const userOf = (uri) => decodeURIComponent(new URL(uri).username);
+const readUser = userOf(process.env.MONGO_READ_URI);
+const writeUser = userOf(process.env.MONGO_WRITE_URI);
+
+module.exports = { readConn, writeConn, readUser, writeUser };

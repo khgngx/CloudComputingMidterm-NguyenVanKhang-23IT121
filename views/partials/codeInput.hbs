@@ -1,0 +1,6 @@
+{{! Product-code input with a live status mark; behaviour is wired up by the script in books.hbs. }}
+<span class="code-field" data-code-field>
+  <input name="code" value="{{value}}" inputmode="numeric" autocomplete="off" placeholder="{{@root.codePrefix}}-001" pattern="{{@root.codePrefix}}-[0-9]+" data-prefix="{{@root.codePrefix}}" aria-label="Mã sản phẩm" required>
+  <span class="code-status" role="img" hidden></span>
+  <small class="code-hint" role="alert" hidden>Thư viện chỉ có đầu mã sách {{@root.codePrefix}}!</small>
+</span>

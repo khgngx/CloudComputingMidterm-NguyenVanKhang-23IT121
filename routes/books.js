@@ -1,6 +1,7 @@
 const express = require('express');
 const { BookRead, BookWrite } = require('../models/Book');
 const validateCode = require('../middleware/validateCode');
+const { parseCode } = validateCode;
 const requireWriter = require('../middleware/requireWriter');
 const { VAT } = require('../config/student');
 const { readUser, writeUser } = require('../config/db');
@@ -16,26 +17,38 @@ function parseBookFields(body) {
   }
   const title = String(body.title || '').trim();
   if (!title) return { error: 'Tên sách là bắt buộc.' };
-  return { title, price };
+  const author = String(body.author || '').trim();
+  if (!author) return { error: 'Tác giả là bắt buộc.' };
+  return { title, author, price };
 }
 
 // READ -> reader account (for both views; the writer connection is only used to write)
+// An optional ?code= narrows the list to one book; it must pass the same code check as writes.
 router.get('/', async (req, res) => {
-  const books = await BookRead.find().sort({ code: 1 }).lean();
-  console.log(`[READ] ${readUser} -> books.find (${books.length} docs)`);
+  const rawCode = req.query.code;
+  let searchCode;
+  if (rawCode !== undefined && rawCode !== '') {
+    const parsed = parseCode(rawCode);
+    if (parsed.error) return res.status(400).render('error', { message: parsed.error });
+    searchCode = parsed.code;
+  }
+
+  const books = await BookRead.find(searchCode ? { code: searchCode } : {})
+    .sort({ code: 1 })
+    .lean();
+  const totalBooks = searchCode ? await BookRead.countDocuments() : books.length;
+  console.log(`[READ] ${readUser} -> books.find (${books.length} docs${searchCode ? `, code ${searchCode}` : ''})`);
   const { flash } = req.session;
   delete req.session.flash;
-  res.render('books', { books, flash });
+  res.render('books', { books, totalBooks, searchCode, flash });
 });
 
 // WRITE -> writer account
 router.post('/', requireWriter, validateCode, async (req, res) => {
   const fields = parseBookFields(req.body);
   if (fields.error) return res.status(400).render('error', { message: fields.error });
-  const author = String(req.body.author || '').trim();
-  if (!author) return res.status(400).render('error', { message: 'Tác giả là bắt buộc.' });
 
-  const { title, price } = fields;
+  const { title, author, price } = fields;
   const priceAfterVat = priceWithVat(price);
   try {
     await BookWrite.create({ code: req.body.code, title, author, price, vat: VAT, priceAfterVat });
@@ -52,17 +65,17 @@ router.post('/', requireWriter, validateCode, async (req, res) => {
   res.redirect('/');
 });
 
-// WRITE -> writer account: rename and/or reprice; price after VAT is recomputed before saving
+// WRITE -> writer account: edit title, author and/or price; price after VAT is recomputed before saving
 router.post('/books/:code', requireWriter, async (req, res) => {
   const fields = parseBookFields(req.body);
   if (fields.error) return res.status(400).render('error', { message: fields.error });
 
   const { code } = req.params;
-  const { title, price } = fields;
+  const { title, author, price } = fields;
   const priceAfterVat = priceWithVat(price);
   const result = await BookWrite.updateOne(
     { code },
-    { $set: { title, price, vat: VAT, priceAfterVat } },
+    { $set: { title, author, price, vat: VAT, priceAfterVat } },
     { runValidators: true },
   );
   if (result.matchedCount === 0) {

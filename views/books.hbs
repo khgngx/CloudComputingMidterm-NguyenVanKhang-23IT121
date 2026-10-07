@@ -1,0 +1,25 @@
+<h1>Quản lý Sách</h1>
+
+<form method="POST" action="/">
+  <input name="code" placeholder="Mã sản phẩm (bắt đầu bằng {{studentId}}…)" required>
+  <input name="title" placeholder="Tên sách" required>
+  <input name="author" placeholder="Tác giả" required>
+  <input name="price" type="number" min="0" step="any" placeholder="Giá gốc" required>
+  <button type="submit">Thêm sách</button>
+</form>
+
+<table>
+  <thead>
+    <tr><th>Mã</th><th>Tên sách</th><th>Tác giả</th><th>Giá gốc</th><th>VAT (%)</th><th>Giá sau VAT</th></tr>
+  </thead>
+  <tbody>
+    {{#each books}}
+    <tr>
+      <td>{{code}}</td><td>{{title}}</td><td>{{author}}</td>
+      <td>{{price}}</td><td>{{vat}}</td><td>{{priceAfterVat}}</td>
+    </tr>
+    {{else}}
+    <tr><td colspan="6">Chưa có sách nào.</td></tr>
+    {{/each}}
+  </tbody>
+</table>

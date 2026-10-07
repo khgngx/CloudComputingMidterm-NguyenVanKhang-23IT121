@@ -8,7 +8,6 @@
   {{else}}
   <p class="routing">
     Đang dùng tài khoản đọc <code>{{readUser}}</code>: chỉ xem danh sách, giá và giá sau thuế.
-    · <a href="/status">/status</a>
   </p>
   {{/if}}
 </section>
@@ -16,7 +15,7 @@
 <section class="stats" aria-label="Tổng quan">
   <div class="card stat"><small>Tổng số sách</small><strong>{{books.length}}</strong></div>
   <div class="card stat"><small>VAT áp dụng</small><strong>{{vat}}%</strong></div>
-  <div class="card stat"><small>Tài khoản đang dùng</small><strong class="text">{{#if isWriter}}Writer · thủ thư{{else}}Reader · chỉ xem{{/if}}</strong></div>
+  <div class="card stat"><small>Tài khoản đang dùng</small><strong class="text">{{#if isWriter}}Writer · Thủ thư{{else}}Reader · Chỉ xem{{/if}}</strong></div>
   <div class="card stat"><small>Lượt truy cập (session)</small><strong>{{views}}</strong></div>
 </section>
 

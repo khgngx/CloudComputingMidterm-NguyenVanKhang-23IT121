@@ -8,13 +8,25 @@
     body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
     table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
     th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; }
-    form { display: grid; gap: .5rem; max-width: 420px; }
+    form.add { display: grid; gap: .5rem; max-width: 420px; }
+    form.account { display: flex; gap: .5rem; align-items: center; justify-content: flex-end; }
+    td input { width: 100%; box-sizing: border-box; }
     .flash { background: #e6f4ea; padding: .5rem .75rem; border-radius: 4px; }
     .routing { color: #444; font-size: .9rem; }
     footer { margin-top: 2rem; color: #555; }
   </style>
 </head>
 <body>
+  <header>
+    <form method="POST" action="/account" class="account">
+      <label for="account">Tài khoản:</label>
+      <select id="account" name="account" onchange="this.form.submit()">
+        <option value="reader" {{#unless isWriter}}selected{{/unless}}>Reader – {{readUser}} (chỉ xem)</option>
+        <option value="writer" {{#if isWriter}}selected{{/if}}>Writer – {{writeUser}} (thủ thư)</option>
+      </select>
+      <noscript><button type="submit">Chuyển</button></noscript>
+    </form>
+  </header>
   <main>{{{body}}}</main>
   <footer>
     <hr>

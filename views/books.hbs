@@ -2,19 +2,49 @@
 
 {{#if flash}}<p class="flash">{{flash}}</p>{{/if}}
 
-<ul class="routing">
-  <li>Xem danh sách → tài khoản đọc <code>{{readUser}}</code> (role <code>read</code>)</li>
-  <li>Thêm sách → tài khoản ghi <code>{{writeUser}}</code> (role <code>readWrite</code>)</li>
-  <li>Session → lưu tại Atlas, collection <code>sessions</code> · <a href="/status">/status</a></li>
-</ul>
+{{#if isWriter}}
+<p class="routing">
+  Đang dùng tài khoản ghi <code>{{writeUser}}</code> (thủ thư): thêm sách, sửa giá, đổi tên.
+  Danh sách vẫn được đọc bằng <code>{{readUser}}</code>. · <a href="/status">/status</a>
+</p>
 
-<form method="POST" action="/">
-  <input name="code" placeholder="Mã sản phẩm (bắt đầu bằng {{studentId}}…)" required>
+<h2>Thêm sách mới</h2>
+<form method="POST" action="/" class="add">
+  <input name="code" placeholder="Mã sản phẩm (bắt đầu bằng 3 số cuối MSSV)" required>
   <input name="title" placeholder="Tên sách" required>
   <input name="author" placeholder="Tác giả" required>
   <input name="price" type="number" min="0" step="any" placeholder="Giá gốc" required>
   <button type="submit">Thêm sách</button>
 </form>
+
+<h2>Danh sách sách</h2>
+<table>
+  <thead>
+    <tr><th>Mã</th><th>Tên sách</th><th>Tác giả</th><th>Giá gốc</th><th>VAT (%)</th><th>Giá sau VAT</th><th></th></tr>
+  </thead>
+  <tbody>
+    {{#each books}}
+    <tr>
+      <td>{{code}}</td>
+      <td><input form="edit-{{code}}" name="title" value="{{title}}" required></td>
+      <td>{{author}}</td>
+      <td><input form="edit-{{code}}" name="price" type="number" min="0" step="any" value="{{price}}" required></td>
+      <td>{{vat}}</td>
+      <td>{{priceAfterVat}}</td>
+      <td>
+        <form id="edit-{{code}}" method="POST" action="/books/{{code}}"><button type="submit">Lưu</button></form>
+      </td>
+    </tr>
+    {{else}}
+    <tr><td colspan="7">Chưa có sách nào.</td></tr>
+    {{/each}}
+  </tbody>
+</table>
+{{else}}
+<p class="routing">
+  Đang dùng tài khoản đọc <code>{{readUser}}</code>: chỉ xem danh sách, giá và giá sau thuế.
+  · <a href="/status">/status</a>
+</p>
 
 <table>
   <thead>
@@ -31,3 +61,4 @@
     {{/each}}
   </tbody>
 </table>
+{{/if}}

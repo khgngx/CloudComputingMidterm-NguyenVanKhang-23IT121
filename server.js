@@ -5,6 +5,7 @@ const path = require('path');
 const sessionMw = require('./middleware/session');
 const booksRouter = require('./routes/books');
 const statusRouter = require('./routes/status');
+const accountRouter = require('./routes/account');
 const { readUser, writeUser } = require('./config/db');
 const { STUDENT_ID, STUDENT_NAME, VAT } = require('./config/student');
 
@@ -27,12 +28,14 @@ app.use((req, res, next) => {
   res.locals.studentName = STUDENT_NAME;
   res.locals.studentId = STUDENT_ID;
   res.locals.vat = VAT;
+  res.locals.isWriter = req.session.account === 'writer'; // default: least privilege
   res.locals.readUser = readUser;
   res.locals.writeUser = writeUser;
   next();
 });
 
 app.use('/status', statusRouter);
+app.use('/account', accountRouter);
 app.use('/', booksRouter);
 
 app.use((err, req, res, next) => {

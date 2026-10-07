@@ -7,7 +7,7 @@ const booksRouter = require('./routes/books');
 const statusRouter = require('./routes/status');
 const accountRouter = require('./routes/account');
 const { readUser, writeUser } = require('./config/db');
-const { STUDENT_ID, STUDENT_NAME, VAT } = require('./config/student');
+const { STUDENT_ID, STUDENT_NAME, CODE_PREFIX, VAT } = require('./config/student');
 
 const app = express();
 app.set('trust proxy', 1); // required behind Render's proxy for secure cookies
@@ -28,6 +28,7 @@ app.use((req, res, next) => {
   res.locals.studentName = STUDENT_NAME;
   res.locals.studentId = STUDENT_ID;
   res.locals.vat = VAT;
+  res.locals.codePrefix = CODE_PREFIX;
   res.locals.isWriter = req.session.account === 'writer'; // default: least privilege
   res.locals.readUser = readUser;
   res.locals.writeUser = writeUser;

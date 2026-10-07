@@ -2,17 +2,17 @@
   <h1>Quản lý Sách</h1>
   {{#if isWriter}}
   <p class="routing">
-    Đang dùng tài khoản ghi <code>{{writeUser}}</code> (Thủ Thư): thêm sách, sửa giá, đổi tên.
-   
+    Đang dùng tài khoản ghi <code>{{writeUser}}</code> (Thủ Thư): thêm sách, sửa giá, đổi tên, sửa tác giả.
+  </p>
   {{else}}
   <p class="routing">
-    Đang dùng tài khoản đọc <code>{{readUser}}</code>: chỉ xem danh sách, giá và giá sau thuế.
+    Đang dùng tài khoản đọc <code>{{readUser}}</code>: Chỉ xem danh sách, giá và giá sau thuế.
   </p>
   {{/if}}
 </section>
 
 <section class="stats" aria-label="Tổng quan">
-  <div class="card stat"><small>Tổng số sách</small><strong>{{books.length}}</strong></div>
+  <div class="card stat"><small>Tổng số sách</small><strong>{{totalBooks}}</strong></div>
   <div class="card stat"><small>VAT áp dụng</small><strong>{{vat}}%</strong></div>
   <div class="card stat"><small>Tài khoản đang dùng</small><strong class="text">{{#if isWriter}}Writer · Thủ Thư{{else}}Reader · Chỉ xem{{/if}}</strong></div>
   <div class="card stat"><small>Lượt truy cập (session)</small><strong>{{views}}</strong></div>
@@ -33,6 +33,12 @@
       <h2>Danh sách sách</h2>
       <span class="chip">{{books.length}} sách</span>
     </div>
+    <form method="GET" action="/" class="search">
+      <span class="search-label">Tìm theo mã sách</span>
+      {{> codeInput value=searchCode}}
+      <button type="submit" class="btn sky small">Tìm</button>
+      {{#if searchCode}}<a href="/">Xem tất cả</a>{{/if}}
+    </form>
     <div class="table-wrap">
       <table>
         <thead>
@@ -48,7 +54,7 @@
             <td><span class="chip">{{code}}</span></td>
             {{#if @root.isWriter}}
             <td class="title"><input form="edit-{{code}}" name="title" value="{{title}}" aria-label="Tên sách" required></td>
-            <td>{{author}}</td>
+            <td><input form="edit-{{code}}" name="author" value="{{author}}" aria-label="Tác giả" required></td>
             <td class="num"><input form="edit-{{code}}" name="price" type="number" min="0" step="any" value="{{price}}" aria-label="Giá gốc" required></td>
             {{else}}
             <td class="title">{{title}}</td>
@@ -64,7 +70,7 @@
             {{/if}}
           </tr>
           {{else}}
-          <tr><td class="empty" colspan="{{#if isWriter}}7{{else}}6{{/if}}">Chưa có sách nào.</td></tr>
+          <tr><td class="empty" colspan="{{#if isWriter}}7{{else}}6{{/if}}">{{#if searchCode}}Không tìm thấy sách có mã "{{searchCode}}".{{else}}Chưa có sách nào.{{/if}}</td></tr>
           {{/each}}
         </tbody>
       </table>
@@ -75,8 +81,8 @@
   <aside class="card panel side">
     <div class="panel-head"><h2>Thêm sách mới</h2></div>
     <form method="POST" action="/" class="add">
-      <label class="field">Mã sản phẩm <small>Bắt đầu bằng 3 số cuối MSSV</small>
-        <input name="code" required>
+      <label class="field">Mã sản phẩm <small>3 số cuối MSSV ({{codePrefix}}), dấu gạch tự thêm, rồi số thứ tự</small>
+        {{> codeInput}}
       </label>
       <label class="field">Tên sách
         <input name="title" required>
@@ -92,3 +98,46 @@
   </aside>
   {{/if}}
 </div>
+
+<script>
+  document.querySelectorAll('[data-code-field]').forEach((field) => {
+    const input = field.querySelector('input');
+    const status = field.querySelector('.code-status');
+    const hint = field.querySelector('.code-hint');
+    const submit = input.form.querySelector('[type="submit"]');
+    const prefix = input.dataset.prefix;
+
+    // The check starts once the 3-digit prefix is in; typing is never blocked,
+    // only submitting is, until the code reads "<prefix>-<sequence number>".
+    const refresh = () => {
+      const hasPrefix = input.value.length >= 3;
+      const prefixOk = input.value.slice(0, 3) === prefix;
+      const complete = prefixOk && /^\d{3}-\d+$/.test(input.value);
+
+      status.hidden = !hasPrefix;
+      hint.hidden = !hasPrefix || prefixOk;
+      if (hasPrefix) {
+        const tip = !prefixOk
+          ? `Không hợp lệ: đầu mã phải là ${prefix}`
+          : complete ? 'Hợp lệ' : 'Hợp lệ, hãy nhập tiếp số thứ tự';
+        status.dataset.state = prefixOk ? 'ok' : 'bad';
+        status.textContent = prefixOk ? '✓' : '✕';
+        status.dataset.tip = tip;
+        status.setAttribute('aria-label', tip);
+      }
+      submit.disabled = !complete;
+    };
+
+    // Keeps only digits and inserts the hyphen after the third one.
+    input.addEventListener('input', (event) => {
+      const digits = input.value.replace(/\D/g, '');
+      // While deleting, don't re-add a trailing hyphen or it could never be erased.
+      const deleting = (event.inputType || '').startsWith('delete');
+      const needsHyphen = digits.length > 3 || (digits.length === 3 && !deleting);
+      input.value = needsHyphen ? `${digits.slice(0, 3)}-${digits.slice(3)}` : digits;
+      refresh();
+    });
+
+    refresh();
+  });
+</script>

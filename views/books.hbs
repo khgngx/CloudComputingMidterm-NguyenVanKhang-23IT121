@@ -2,9 +2,8 @@
   <h1>Quản lý Sách</h1>
   {{#if isWriter}}
   <p class="routing">
-    Đang dùng tài khoản ghi <code>{{writeUser}}</code> (thủ thư): thêm sách, sửa giá, đổi tên.
-    Danh sách vẫn được đọc bằng <code>{{readUser}}</code>. · <a href="/status">/status</a>
-  </p>
+    Đang dùng tài khoản ghi <code>{{writeUser}}</code> (Thủ Thư): thêm sách, sửa giá, đổi tên.
+   
   {{else}}
   <p class="routing">
     Đang dùng tài khoản đọc <code>{{readUser}}</code>: chỉ xem danh sách, giá và giá sau thuế.
@@ -15,7 +14,7 @@
 <section class="stats" aria-label="Tổng quan">
   <div class="card stat"><small>Tổng số sách</small><strong>{{books.length}}</strong></div>
   <div class="card stat"><small>VAT áp dụng</small><strong>{{vat}}%</strong></div>
-  <div class="card stat"><small>Tài khoản đang dùng</small><strong class="text">{{#if isWriter}}Writer · Thủ thư{{else}}Reader · Chỉ xem{{/if}}</strong></div>
+  <div class="card stat"><small>Tài khoản đang dùng</small><strong class="text">{{#if isWriter}}Writer · Thủ Thư{{else}}Reader · Chỉ xem{{/if}}</strong></div>
   <div class="card stat"><small>Lượt truy cập (session)</small><strong>{{views}}</strong></div>
 </section>
 

@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/khgngx/CloudComputingMidterm-NguyenVanKhang-23IT121.git"
+    "url": "git+https://github.com/khgngx/Library-Manager--CC.git"
   },
   "keywords": [],
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/khgngx/CloudComputingMidterm-NguyenVanKhang-23IT121/issues"
+    "url": "https://github.com/khgngx/Library-Manager--CC/issues"
   },
-  "homepage": "https://github.com/khgngx/CloudComputingMidterm-NguyenVanKhang-23IT121#readme",
+  "homepage": "https://github.com/khgngx/Library-Manager--CC#readme",
   "dependencies": {
     "connect-mongo": "^6.0.0",
     "dotenv": "^18.0.6",
